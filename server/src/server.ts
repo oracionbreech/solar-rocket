@@ -207,10 +207,9 @@ const main = async () => {
     ) => {
       try {
         if (!req.query.city) {
-          return res.status(400).json({
-            message:
-              "Please provide city.",
-          });
+          throw new Error(
+            "Please provide city."
+          );
         }
 
         const cityWeather =
@@ -222,7 +221,9 @@ const main = async () => {
           cityWeather.data
         );
       } catch (error) {
-        return res.send(error);
+        return res
+          .status(500)
+          .json(error);
       }
     }
   );
