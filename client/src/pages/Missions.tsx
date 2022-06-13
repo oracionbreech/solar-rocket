@@ -1,4 +1,8 @@
-import { SyntheticEvent, useEffect, useState } from "react";
+import {
+  SyntheticEvent,
+  useEffect,
+  useState,
+} from "react";
 import { AppLayout } from "../layouts/AppLayout";
 import fetchGraphQL from "../graphql/GraphQL";
 import { Mission } from "../graphql/schema";
@@ -33,7 +37,10 @@ import {
   ArrowDownward as ArrowDownwardIcon,
   ArrowUpward as ArrowUpwardIcon,
 } from "@mui/icons-material";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import {
+  DateTimePicker,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { ListMenu } from "../components/ListMenu";
@@ -55,7 +62,8 @@ const getMissions = async (
   {
     Missions(
       sort: {
-        field: ${sortField}
+        field: ${sortField},
+        desc: ${sortDesc}
       }
     ) {
       id
@@ -72,14 +80,27 @@ const getMissions = async (
 };
 
 const Missions = (): JSX.Element => {
-  const [missions, setMissions] = useState<Mission[] | null>(null);
-  const [newMissionOpen, setNewMissionOpen] = useState(false);
-  const [tempLaunchDate, setTempLaunchDate] = useState<Date | null>(null);
-  const [sortDesc, setSortDesc] = useState<boolean>(false);
-  const [sortField, setSortField] = useState<SortField>("Title");
-  const [errMessage, setErrMessage] = useState<String | null>(null);
+  const [missions, setMissions] =
+    useState<Mission[] | null>(null);
+  const [
+    newMissionOpen,
+    setNewMissionOpen,
+  ] = useState(false);
+  const [
+    tempLaunchDate,
+    setTempLaunchDate,
+  ] = useState<Date | null>(null);
+  const [sortDesc, setSortDesc] =
+    useState<boolean>(false);
+  const [sortField, setSortField] =
+    useState<SortField>("Title");
+  const [errMessage, setErrMessage] =
+    useState<String | null>(null);
 
-  const handleErrClose = (event?: SyntheticEvent | Event, reason?: string) => {
+  const handleErrClose = (
+    event?: SyntheticEvent | Event,
+    reason?: string
+  ) => {
     if (reason === "clickaway") return;
     setErrMessage(null);
   };
@@ -93,11 +114,16 @@ const Missions = (): JSX.Element => {
     setNewMissionOpen(false);
   };
 
-  const handleTempLaunchDateChange = (newValue: Date | null) => {
+  const handleTempLaunchDateChange = (
+    newValue: Date | null
+  ) => {
     setTempLaunchDate(newValue);
   };
 
-  const handleSortFieldChange = (event: SyntheticEvent, value: SortField) => {
+  const handleSortFieldChange = (
+    event: SyntheticEvent,
+    value: SortField
+  ) => {
     setSortField(value);
   };
   const handleSortDescClick = () => {
@@ -105,35 +131,62 @@ const Missions = (): JSX.Element => {
   };
 
   useEffect(() => {
-    getMissions(sortField)
-      .then((result: MissionsResponse) => {
-        setMissions(result.data.Missions);
-      })
+    getMissions(sortField, sortDesc)
+      .then(
+        (result: MissionsResponse) => {
+          setMissions(
+            result.data.Missions
+          );
+        }
+      )
       .catch((err) => {
-        setErrMessage("Failed to load missions.");
+        console.log(err);
+
+        setErrMessage(
+          "Failed to load missions."
+        );
         console.log(err);
       });
-  }, [sortField]);
+  }, [sortField, sortDesc]);
 
   return (
-    <AppLayout title="Missions">
-      <Container maxWidth="lg">
-        <Typography variant="h4" component="h1">
+    <AppLayout title='Missions'>
+      <Container maxWidth='lg'>
+        <Typography
+          variant='h4'
+          component='h1'
+        >
           Solar Rocket Missions
         </Typography>
 
         <Toolbar disableGutters>
-          <Grid justifyContent="flex-end" container>
+          <Grid
+            justifyContent='flex-end'
+            container
+          >
             <IconButton>
               <FilterAltIcon />
             </IconButton>
             <ListMenu
-              options={["Date", "Title"]}
+              options={[
+                "Date",
+                "Title",
+              ]}
               endIcon={<SortIcon />}
-              onSelectionChange={handleSortFieldChange}
+              onSelectionChange={
+                handleSortFieldChange
+              }
             />
-            <IconButton onClick={handleSortDescClick}>
-              {sortDesc ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+            <IconButton
+              onClick={
+                handleSortDescClick
+              }
+            >
+              {sortDesc ? (
+                <ArrowDownwardIcon />
+              ) : (
+                <ArrowUpwardIcon />
+              )}
             </IconButton>
           </Grid>
         </Toolbar>
@@ -141,77 +194,128 @@ const Missions = (): JSX.Element => {
         {missions ? (
           <Grid container spacing={2}>
             {" "}
-            {missions.map((missions: Mission, key: number) => (
-              <Grid item key={key}>
-                <Card sx={{ width: 275, height: 200 }}>
-                  <CardHeader
-                    title={missions.title}
-                    subheader={new Date(missions.launch.date).toDateString()}
-                  />
-                  <CardContent>
-                    <Typography noWrap>{missions.operator}</Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button>Edit</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
+            {missions.map(
+              (
+                missions: Mission,
+                key: number
+              ) => (
+                <Grid item key={key}>
+                  <Card
+                    sx={{
+                      width: 275,
+                      height: 200,
+                    }}
+                  >
+                    <CardHeader
+                      title={
+                        missions.title
+                      }
+                      subheader={new Date(
+                        missions.launch.date
+                      ).toDateString()}
+                    />
+                    <CardContent>
+                      <Typography
+                        noWrap
+                      >
+                        {
+                          missions.operator
+                        }
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button>
+                        Edit
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              )
+            )}
           </Grid>
         ) : (
-          <Box sx={{ textAlign: "center" }}>
+          <Box
+            sx={{ textAlign: "center" }}
+          >
             <CircularProgress />
           </Box>
         )}
 
-        <Tooltip title="New Mission">
+        <Tooltip title='New Mission'>
           <Fab
-            sx={{ position: "fixed", bottom: 16, right: 16 }}
-            color="primary"
-            aria-label="add"
-            onClick={handleNewMissionOpen}
+            sx={{
+              position: "fixed",
+              bottom: 16,
+              right: 16,
+            }}
+            color='primary'
+            aria-label='add'
+            onClick={
+              handleNewMissionOpen
+            }
           >
             <AddIcon />
           </Fab>
         </Tooltip>
         <Dialog
           open={newMissionOpen}
-          onClose={handleNewMissionClose}
+          onClose={
+            handleNewMissionClose
+          }
           fullWidth
-          maxWidth="sm"
+          maxWidth='sm'
         >
-          <DialogTitle>New Mission</DialogTitle>
+          <DialogTitle>
+            New Mission
+          </DialogTitle>
           <DialogContent>
-            <Grid container direction="column" spacing={2}>
+            <Grid
+              container
+              direction='column'
+              spacing={2}
+            >
               <Grid item>
                 <TextField
                   autoFocus
-                  id="name"
-                  label="Name"
-                  variant="standard"
+                  id='name'
+                  label='Name'
+                  variant='standard'
                   fullWidth
                 />
               </Grid>
               <Grid item>
                 <TextField
                   autoFocus
-                  id="desc"
-                  label="Description"
-                  variant="standard"
+                  id='desc'
+                  label='Description'
+                  variant='standard'
                   fullWidth
                 />
               </Grid>
 
               <Grid item>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <LocalizationProvider
+                  dateAdapter={
+                    AdapterDateFns
+                  }
+                >
                   <DateTimePicker
                     minDate={new Date()}
                     minTime={new Date()}
-                    label="Launch Date"
-                    value={tempLaunchDate}
-                    onChange={handleTempLaunchDateChange}
-                    renderInput={(params) => (
-                      <TextField variant="standard" {...params} />
+                    label='Launch Date'
+                    value={
+                      tempLaunchDate
+                    }
+                    onChange={
+                      handleTempLaunchDateChange
+                    }
+                    renderInput={(
+                      params
+                    ) => (
+                      <TextField
+                        variant='standard'
+                        {...params}
+                      />
                     )}
                   />
                 </LocalizationProvider>
@@ -219,18 +323,37 @@ const Missions = (): JSX.Element => {
             </Grid>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleNewMissionClose}>Cancel</Button>
-            <Button onClick={handleNewMissionClose}>Save</Button>
+            <Button
+              onClick={
+                handleNewMissionClose
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={
+                handleNewMissionClose
+              }
+            >
+              Save
+            </Button>
           </DialogActions>
         </Dialog>
       </Container>
       <Snackbar
         open={errMessage != null}
         autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
         onClose={handleErrClose}
       >
-        <Alert onClose={handleErrClose} variant="filled" severity="error">
+        <Alert
+          onClose={handleErrClose}
+          variant='filled'
+          severity='error'
+        >
           {errMessage}
         </Alert>
       </Snackbar>
