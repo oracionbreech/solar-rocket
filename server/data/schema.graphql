@@ -1,10 +1,14 @@
 type Query {
   Mission(id: ID!): Mission
-  Missions(sort: MissionSortOptions): [Mission]!
+  Missions(
+    sort: MissionSortOptions
+  ): [Mission]!
 }
 
 type Mutation {
-  createMission(mission: MissionInput): Mission
+  createMission(
+    mission: MissionInput
+  ): Mission
 }
 
 input MissionInput {
@@ -46,6 +50,7 @@ input MissionSortOptions {
 enum MissionSortFields {
   Title
   Date
+  Operator
 }
 
 type Mission {

@@ -45,7 +45,10 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { ListMenu } from "../components/ListMenu";
 
-type SortField = "Title" | "Date";
+type SortField =
+  | "Title"
+  | "Date"
+  | "Operator";
 
 interface MissionsResponse {
   data: {
@@ -94,6 +97,7 @@ const Missions = (): JSX.Element => {
     useState<boolean>(false);
   const [sortField, setSortField] =
     useState<SortField>("Title");
+
   const [errMessage, setErrMessage] =
     useState<String | null>(null);
 
@@ -171,6 +175,7 @@ const Missions = (): JSX.Element => {
               options={[
                 "Date",
                 "Title",
+                "Operator",
               ]}
               endIcon={<SortIcon />}
               onSelectionChange={

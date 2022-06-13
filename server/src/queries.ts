@@ -26,7 +26,10 @@ export const ListMissions = (
             b = new Date(
               bMission.launch.date
             );
-
+          case "Operator":
+            a = aMission.operator;
+            b = bMission.operator;
+            break;
             break;
           default:
             a = "";
