@@ -47,7 +47,7 @@ const CurrentWeather: React.FC<{
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "50vw",
+            width: "45vw",
           }}
         >
           <CardContent
