@@ -1,5 +1,8 @@
+import React from "react";
+
 // Components
 import CurrentWeather from "../components/Weather/CurrentWeather";
+import Forecasts from "../components/Weather/Forecasts";
 
 // Hooks
 import { useWeather } from "../hooks/useWeather";
@@ -9,47 +12,37 @@ import {
   Box,
   CircularProgress,
   Container,
-  Fab,
-  Tooltip,
+  TextField,
   Typography,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
 
 // Layouts
 import { AppLayout } from "../layouts/AppLayout";
-import Forecasts from "../components/Weather/Forecasts";
 
 const Weather = (): JSX.Element => {
-  const { weather, loading } =
-    useWeather();
+  const {
+    weather,
+    loading,
+    debouncedSearchHandler,
+  } = useWeather();
 
   const CONTENT = (
     <>
-      <CurrentWeather
-        weather={weather}
-      />
-      <Forecasts
-        forecast={
-          weather
-            ? weather?.forecast
-                .forecastday
-            : []
-        }
-      />
-      <Tooltip title='New Mission'>
-        <Fab
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-          }}
-          color='primary'
-          aria-label='add'
-          onClick={() => {}}
-        >
-          <AddIcon />
-        </Fab>
-      </Tooltip>
+      {weather && (
+        <CurrentWeather
+          weather={weather}
+        />
+      )}
+      {weather && (
+        <Forecasts
+          forecast={
+            weather && weather.forecast
+              ? weather?.forecast
+                  .forecastday
+              : []
+          }
+        />
+      )}
     </>
   );
   const LOADING = (
@@ -61,16 +54,52 @@ const Weather = (): JSX.Element => {
     </Box>
   );
 
+  const EMPTY = (
+    <>
+      <Box
+        textAlign='center'
+        marginTop={10}
+      >
+        <Typography
+          variant='h5'
+          component='h1'
+        >
+          Can't find location
+        </Typography>
+      </Box>
+    </>
+  );
+
   return (
     <AppLayout title='Weather'>
       <Container maxWidth='lg'>
-        <Typography
-          variant='h4'
-          component='h1'
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
         >
-          Weather
-        </Typography>
-        {loading ? LOADING : CONTENT}
+          <Typography
+            variant='h4'
+            component='h1'
+          >
+            Weather
+          </Typography>
+          <Box marginLeft={2}>
+            <TextField
+              id='standard-search'
+              label='Enter City'
+              type='search'
+              variant='standard'
+              onChange={
+                debouncedSearchHandler
+              }
+            />
+          </Box>
+        </Box>
+        {!loading && weather && CONTENT}
+        {!loading && !weather && EMPTY}
+        {loading && LOADING}
       </Container>
     </AppLayout>
   );

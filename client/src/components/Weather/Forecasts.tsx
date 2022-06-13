@@ -18,7 +18,10 @@ const Forecasts: React.FC<{
         {forecast &&
           isArray(forecast) &&
           forecast.map((item) => (
-            <Forecast {...item} />
+            <Forecast
+              {...item}
+              key={item.date_epoch}
+            />
           ))}
       </Grid>
     </div>

@@ -15,11 +15,22 @@ const CurrentWeather: React.FC<{
 
   const temperatureText =
     tempUnit === "celsius"
-      ? `${weather?.current.feelslike_c}°C`
-      : `${weather?.current.feelslike_f}°F`;
+      ? `${
+          weather &&
+          weather.current &&
+          weather?.current.feelslike_c
+        }°C`
+      : `${
+          weather &&
+          weather.current &&
+          weather?.current.feelslike_f
+        }°F`;
 
   const conditionIconURL = weather
-    ? `https:${weather.current.condition.icon}`
+    ? `https:${
+        weather.current &&
+        weather.current.condition.icon
+      }`
     : "";
 
   return (
@@ -66,10 +77,10 @@ const CurrentWeather: React.FC<{
               component='div'
             >
               Humidity:{" "}
-              {
+              {weather &&
+                weather.current &&
                 weather?.current
-                  .humidity
-              }
+                  .humidity}
               %
             </Typography>
             <Typography
@@ -78,10 +89,10 @@ const CurrentWeather: React.FC<{
               component='div'
             >
               Wind:{" "}
-              {
+              {weather &&
+                weather.current &&
                 weather?.current
-                  .wind_kph
-              }{" "}
+                  .wind_kph}{" "}
               km/h
             </Typography>
           </CardContent>
@@ -100,18 +111,21 @@ const CurrentWeather: React.FC<{
               component='div'
               variant='h5'
             >
-              {weather?.location.name},{" "}
-              {weather?.location.region}
+              {weather?.location &&
+                weather?.location.name}
+              ,{" "}
+              {weather?.location &&
+                weather?.location
+                  .region}
             </Typography>
             <Typography
               variant='subtitle1'
               color='text.secondary'
               component='div'
             >
-              {
+              {weather?.current &&
                 weather?.current
-                  .condition.text
-              }
+                  .condition.text}
             </Typography>
             <Typography
               variant='subtitle2'
@@ -120,8 +134,10 @@ const CurrentWeather: React.FC<{
             >
               {new Date(
                 Number(
-                  weather?.location
-                    .localtime_epoch
+                  weather &&
+                    weather.location &&
+                    weather?.location
+                      .localtime_epoch
                 ) * 1000
               ).toDateString()}
             </Typography>
