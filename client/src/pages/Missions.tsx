@@ -1,14 +1,9 @@
-import {
-  SyntheticEvent,
-  useEffect,
-  useState,
-} from "react";
+import React from "react";
 
 // Components
 import { ListMenu } from "../components/ListMenu";
 
 // GraphQL
-import fetchGraphQL from "../graphql/GraphQL";
 import { Mission } from "../graphql/schema";
 
 // Layouts
@@ -51,152 +46,67 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-type SortField =
-  | "Title"
-  | "Date"
-  | "Operator";
+// Helpers
+import { addMissionFormModel } from "../helpers/AddMission/formModel";
 
-interface MissionsResponse {
-  data: {
-    Missions: Mission[];
-  };
-}
+// Hooks
+import { useAddMission } from "../hooks/useAddMission";
 
-const getMissions = async (
-  sortField: SortField,
-  sortDesc?: Boolean
-): Promise<MissionsResponse> => {
-  return await fetchGraphQL(
-    `
-  {
-    Missions(
-      sort: {
-        field: ${sortField},
-        desc: ${sortDesc}
-      }
-    ) {
-      id
-      title
-      operator
-      launch {
-        date
-      }
-    }
-  }
-  `,
-    []
-  );
-};
-
-const f = "double dot";
-
-const createMission = async () => {
-  return await fetchGraphQL(
-    `
-  mutation {
-    createMission(mission: {
-      title: "${f}", 
-      operator: "", 
-      orbit: {
-        periapsis: 200, 
-        apoapsis: 300, 
-        inclination: 240
-      }, 
-      launch: {
-        date: "2022-12-26T09:32:40.000Z"
-        vehicle: "${f}", 
-        location: {
-          name: "Cape Canaveral SLC-40", 
-          longitude: -80.57718, 
-          latitude: -28.562106}}, 
-          payload: {
-            capacity: 22000, 
-            available: 7000
-          }
-        }) {
-      id
-    }
-  }
-  `,
-    []
-  );
-};
+// Types
+import { AddMissionFormFieldType } from "../models/forms";
 
 const Missions = (): JSX.Element => {
-  const [missions, setMissions] =
-    useState<Mission[] | null>(null);
-
-  const [
+  const { formFields } =
+    addMissionFormModel;
+  const {
+    errors,
+    getFieldHelpers,
+    getFieldProps,
+    handleSubmit,
+    loading: creatingMissing,
+    touched,
     newMissionOpen,
     setNewMissionOpen,
-  ] = useState(false);
-  const [
-    tempLaunchDate,
-    setTempLaunchDate,
-  ] = useState<Date | null>(null);
-  const [sortDesc, setSortDesc] =
-    useState<boolean>(false);
-  const [sortField, setSortField] =
-    useState<SortField>("Title");
+    handleSortDescClick,
+    handleSortFieldChange,
+    missions,
+    handleErrClose,
+    errMessage,
+    sortDesc,
+  } = useAddMission();
 
-  const [errMessage, setErrMessage] =
-    useState<String | null>(null);
-
-  const handleErrClose = (
-    event?: SyntheticEvent | Event,
-    reason?: string
+  const FieldError = (
+    name: AddMissionFormFieldType
   ) => {
-    if (reason === "clickaway") return;
-    setErrMessage(null);
+    return (
+      <Typography
+        variant='subtitle2'
+        color='error'
+      >
+        {touched[name] &&
+          errors[name] &&
+          errors[name]}
+      </Typography>
+    );
   };
 
   const handleNewMissionOpen = () => {
-    setTempLaunchDate(null);
+    getFieldHelpers("date").setValue(
+      null
+    );
     setNewMissionOpen(true);
   };
 
-  const handleNewMissionClose =
-    async () => {
-      const s = await createMission();
-      console.log(s);
-
-      setNewMissionOpen(false);
-    };
+  const handleNewMissionClose = () =>
+    setNewMissionOpen(false);
 
   const handleTempLaunchDateChange = (
     newValue: Date | null
   ) => {
-    setTempLaunchDate(newValue);
+    getFieldHelpers("date").setValue(
+      newValue?.toISOString()
+    );
   };
-
-  const handleSortFieldChange = (
-    event: SyntheticEvent,
-    value: SortField
-  ) => {
-    setSortField(value);
-  };
-  const handleSortDescClick = () => {
-    setSortDesc(!sortDesc);
-  };
-
-  useEffect(() => {
-    getMissions(sortField, sortDesc)
-      .then(
-        (result: MissionsResponse) => {
-          setMissions(
-            result.data.Missions
-          );
-        }
-      )
-      .catch((err) => {
-        console.log(err);
-
-        setErrMessage(
-          "Failed to load missions."
-        );
-        console.log(err);
-      });
-  }, [sortField, sortDesc]);
 
   return (
     <AppLayout title='Missions'>
@@ -326,21 +236,133 @@ const Missions = (): JSX.Element => {
             >
               <Grid item>
                 <TextField
-                  autoFocus
-                  id='name'
-                  label='Name'
+                  {...getFieldProps(
+                    formFields.title
+                      .name
+                  )}
+                  placeholder={
+                    formFields.title
+                      .placeholder
+                  }
                   variant='standard'
                   fullWidth
                 />
+                {FieldError(
+                  formFields.title.name
+                )}
               </Grid>
+
               <Grid item>
                 <TextField
-                  autoFocus
-                  id='desc'
-                  label='Description'
+                  {...getFieldProps(
+                    formFields.operator
+                      .name
+                  )}
+                  placeholder={
+                    formFields.operator
+                      .placeholder
+                  }
                   variant='standard'
                   fullWidth
                 />
+                {FieldError(
+                  formFields.operator
+                    .name
+                )}
+              </Grid>
+
+              <Grid item mt={4}>
+                <Typography variant='subtitle1'>
+                  ORBIT
+                </Typography>
+              </Grid>
+
+              <Box
+                display='flex'
+                pl={2}
+                mt={2}
+              >
+                <Grid item>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .periapsis.name
+                    )}
+                    label={
+                      formFields
+                        .periapsis
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .periapsis
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.periapsis
+                      .name
+                  )}
+                </Grid>
+
+                <Grid item ml={1}>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .apoapsis.name
+                    )}
+                    label={
+                      formFields
+                        .apoapsis
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .apoapsis
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.apoapsis
+                      .name
+                  )}
+                </Grid>
+
+                <Grid item ml={1}>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .inclination
+                        .name
+                    )}
+                    label={
+                      formFields
+                        .inclination
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .inclination
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields
+                      .inclination.name
+                  )}
+                </Grid>
+              </Box>
+
+              <Grid item mt={4}>
+                <Typography variant='subtitle1'>
+                  LAUNCH
+                </Typography>
               </Grid>
 
               <Grid item>
@@ -354,7 +376,9 @@ const Missions = (): JSX.Element => {
                     minTime={new Date()}
                     label='Launch Date'
                     value={
-                      tempLaunchDate
+                      getFieldProps(
+                        formFields.date
+                      ).value
                     }
                     onChange={
                       handleTempLaunchDateChange
@@ -370,6 +394,168 @@ const Missions = (): JSX.Element => {
                   />
                 </LocalizationProvider>
               </Grid>
+
+              <Grid item>
+                <TextField
+                  {...getFieldProps(
+                    formFields.vehicle
+                      .name
+                  )}
+                  placeholder={
+                    formFields.vehicle
+                      .placeholder
+                  }
+                  variant='standard'
+                  fullWidth
+                />
+                {FieldError(
+                  formFields.vehicle
+                    .name
+                )}
+              </Grid>
+
+              <Grid item mt={4}>
+                <Typography variant='subtitle2'>
+                  LOCATION
+                </Typography>
+              </Grid>
+              <Grid item>
+                <TextField
+                  {...getFieldProps(
+                    formFields
+                      .locationName.name
+                  )}
+                  placeholder={
+                    formFields
+                      .locationName
+                      .placeholder
+                  }
+                  variant='standard'
+                  fullWidth
+                />
+                {FieldError(
+                  formFields
+                    .locationName.name
+                )}
+              </Grid>
+
+              <Box
+                display='flex'
+                pl={2}
+                mt={2}
+              >
+                <Grid item>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .longitude.name
+                    )}
+                    label={
+                      formFields
+                        .longitude
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .longitude
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.longitude
+                      .name
+                  )}
+                </Grid>
+
+                <Grid item ml={2}>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .latitude.name
+                    )}
+                    label={
+                      formFields
+                        .latitude
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .latitude
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.latitude
+                      .name
+                  )}
+                </Grid>
+              </Box>
+
+              <Grid item mt={4}>
+                <Typography
+                  variant='subtitle2'
+                  mb={4}
+                >
+                  PAYLOAD
+                </Typography>
+              </Grid>
+              <Box
+                display='flex'
+                pl={2}
+              >
+                <Grid item>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .capacity.name
+                    )}
+                    label={
+                      formFields
+                        .capacity
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .capacity
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.capacity
+                      .name
+                  )}
+                </Grid>
+                <Grid item ml={2}>
+                  <TextField
+                    {...getFieldProps(
+                      formFields
+                        .available.name
+                    )}
+                    label={
+                      formFields
+                        .available
+                        .placeholder
+                    }
+                    placeholder={
+                      formFields
+                        .available
+                        .placeholder
+                    }
+                    variant='standard'
+                    fullWidth
+                  />
+                  {FieldError(
+                    formFields.available
+                      .name
+                  )}
+                </Grid>
+              </Box>
             </Grid>
           </DialogContent>
           <DialogActions>
@@ -381,9 +567,10 @@ const Missions = (): JSX.Element => {
               Cancel
             </Button>
             <Button
-              onClick={
-                handleNewMissionClose
+              onClick={() =>
+                handleSubmit()
               }
+              disabled={creatingMissing}
             >
               Save
             </Button>

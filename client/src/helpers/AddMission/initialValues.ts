@@ -4,7 +4,7 @@ export const addMissionInitialValues = {
   periapsis: 0,
   apoapsis: 0,
   inclination: 0,
-  date: "",
+  date: null,
   vehicle: "",
   locationName: "",
   longitude: 0,
