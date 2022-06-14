@@ -3,9 +3,18 @@ import {
   useEffect,
   useState,
 } from "react";
-import { AppLayout } from "../layouts/AppLayout";
+
+// Components
+import { ListMenu } from "../components/ListMenu";
+
+// GraphQL
 import fetchGraphQL from "../graphql/GraphQL";
 import { Mission } from "../graphql/schema";
+
+// Layouts
+import { AppLayout } from "../layouts/AppLayout";
+
+// MUI
 import {
   Card,
   CardHeader,
@@ -29,7 +38,6 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-
 import {
   Add as AddIcon,
   FilterAlt as FilterAltIcon,
@@ -42,8 +50,6 @@ import {
   LocalizationProvider,
 } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
-import { ListMenu } from "../components/ListMenu";
 
 type SortField =
   | "Title"
@@ -82,9 +88,44 @@ const getMissions = async (
   );
 };
 
+const f = "double dot";
+
+const createMission = async () => {
+  return await fetchGraphQL(
+    `
+  mutation {
+    createMission(mission: {
+      title: "${f}", 
+      operator: "", 
+      orbit: {
+        periapsis: 200, 
+        apoapsis: 300, 
+        inclination: 240
+      }, 
+      launch: {
+        date: "2022-12-26T09:32:40.000Z"
+        vehicle: "${f}", 
+        location: {
+          name: "Cape Canaveral SLC-40", 
+          longitude: -80.57718, 
+          latitude: -28.562106}}, 
+          payload: {
+            capacity: 22000, 
+            available: 7000
+          }
+        }) {
+      id
+    }
+  }
+  `,
+    []
+  );
+};
+
 const Missions = (): JSX.Element => {
   const [missions, setMissions] =
     useState<Mission[] | null>(null);
+
   const [
     newMissionOpen,
     setNewMissionOpen,
@@ -114,9 +155,13 @@ const Missions = (): JSX.Element => {
     setNewMissionOpen(true);
   };
 
-  const handleNewMissionClose = () => {
-    setNewMissionOpen(false);
-  };
+  const handleNewMissionClose =
+    async () => {
+      const s = await createMission();
+      console.log(s);
+
+      setNewMissionOpen(false);
+    };
 
   const handleTempLaunchDateChange = (
     newValue: Date | null
